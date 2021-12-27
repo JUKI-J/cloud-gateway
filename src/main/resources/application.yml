@@ -54,3 +54,16 @@ resilience4j:
         failureRateThreshold: 20
         #Actuator를 통해 circuitBreaker 상태를 확인하기 위한 설정
         registerHealthIndicator: true
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: "*"
+    shutdown:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
