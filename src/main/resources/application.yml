@@ -11,11 +11,25 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: user-service
+                fallbackuri: forward:/fallback/userServiceFallBack
         - id: DEPARTMENT-SERVICE
           uri: lb://DEPARTMENT-SERVICE
           predicates:
             - Path=/departments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: department-service
+                fallbackuri: forward:/fallback/departmentServiceFallBack
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 3000ms
 
+#eureka
 eureka:
   client:
     register-with-eureka: true
@@ -24,3 +38,19 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     hostname: localhost
+
+#resilience4j
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        #Circuit이 닫혀있을 때(정상) Ring Buffer 사이즈, 기본값은 100
+        ringBufferSizeInClosedState: 10
+        #half-open 상태일 때 RingBuffer 사이즈 기본값은 10
+        ringBufferSizeInHalfOpenState: 30
+        #half closed전에 circuitBreaker가 open 되기 전에 기다리는 기간
+        waitDurationInOpenState: 10000ms
+        #Circuit 열지 말지 결정하는 실패 threshold 퍼센테이지
+        failureRateThreshold: 20
+        #Actuator를 통해 circuitBreaker 상태를 확인하기 위한 설정
+        registerHealthIndicator: true
